@@ -24,7 +24,9 @@ class UserEntity(
     @Column(nullable = false)
     var isAdmin: Boolean = false,
 
-    var lastLoginTime: Instant? = null,
+    var lastLoginTime: Instant? = null
+
+    var refreshToken: String? = null,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -44,7 +44,16 @@ data class LoginRequest(
 
 data class LoginResponse(
     val token: String,
+    val refreshToken: String,
     val email: String,
     val name: String,
     val isAdmin: Boolean
+)
+
+data class RefreshRequest(
+    val refreshToken: String
+)
+
+data class RefreshResponse(
+    val token: String
 )

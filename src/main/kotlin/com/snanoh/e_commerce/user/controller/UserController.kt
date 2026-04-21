@@ -1,6 +1,7 @@
 package com.snanoh.e_commerce.user.controller
 
 import com.snanoh.e_commerce.user.dto.LoginRequest
+import com.snanoh.e_commerce.user.dto.RefreshRequest
 import com.snanoh.e_commerce.user.dto.UserCreateRequest
 import com.snanoh.e_commerce.user.dto.UserResponse
 import com.snanoh.e_commerce.user.dto.UserUpdateRequest
@@ -49,6 +50,15 @@ class UserController(
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to "Invalid email or password"))
         } catch (e: UsernameNotFoundException) {
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to "Invalid email or password"))
+        }
+    }
+
+    @PostMapping("/refresh")
+    fun refresh(@RequestBody request: RefreshRequest): ResponseEntity<Any> {
+        return try {
+            ResponseEntity.ok(userService.refresh(request))
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to e.message))
         }
     }
 
