@@ -12,6 +12,7 @@ class JwtProvider {
     private val secretString = "v9yB&E)H@McQfTjWnZr4u7x!A%C*F-JaNdRgUkXp2s5v8y/B?E(G+KbPeShVmYq"
     private val key: SecretKey = Keys.hmacShaKeyFor(secretString.toByteArray())
     private val expirationTime = 3600000L // 1 hour
+    private val refreshExpirationTime = 604800000L // 7 days
 
     fun createToken(email: String, isAdmin: Boolean): String {
         val now = Date()
@@ -22,6 +23,16 @@ class JwtProvider {
             .claim("isAdmin", isAdmin)
             .issuedAt(now)
             .expiration(validity)
+            .signWith(key)
+            .compact()
+    }
+
+    fun createRefreshToken(email: String): String {
+        val now = Date()
+        return Jwts.builder()
+            .subject(email)
+            .issuedAt(now)
+            .expiration(Date(now.time + refreshExpirationTime))
             .signWith(key)
             .compact()
     }

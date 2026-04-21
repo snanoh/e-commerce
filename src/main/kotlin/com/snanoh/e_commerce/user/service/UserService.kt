@@ -4,6 +4,8 @@ import com.snanoh.e_commerce.user.domain.UserEntity
 import com.snanoh.e_commerce.user.domain.UserRepository
 import com.snanoh.e_commerce.user.dto.LoginRequest
 import com.snanoh.e_commerce.user.dto.LoginResponse
+import com.snanoh.e_commerce.user.dto.RefreshRequest
+import com.snanoh.e_commerce.user.dto.RefreshResponse
 import com.snanoh.e_commerce.user.dto.UserCreateRequest
 import com.snanoh.e_commerce.user.dto.UserResponse
 import com.snanoh.e_commerce.user.dto.UserUpdateRequest
@@ -69,7 +71,23 @@ class UserService(
         user.lastLoginTime = Instant.now()
 
         val token = jwtProvider.createToken(user.email, user.isAdmin)
-        return LoginResponse(token = token, email = user.email, name = user.name, isAdmin = user.isAdmin)
+        val refreshToken = jwtProvider.createRefreshToken(user.email)
+        user.refreshToken = refreshToken
+        return LoginResponse(token = token, refreshToken = refreshToken, email = user.email, name = user.name, isAdmin = user.isAdmin)
+    }
+
+    @Transactional
+    fun refresh(request: RefreshRequest): RefreshResponse {
+        if (!jwtProvider.validateToken(request.refreshToken)) {
+            throw IllegalArgumentException("Refresh token expired or invalid")
+        }
+        val email = jwtProvider.getEmail(request.refreshToken)
+        val user = userRepository.findByEmail(email)
+            ?: throw UsernameNotFoundException("User not found: $email")
+        if (user.refreshToken != request.refreshToken) {
+            throw IllegalArgumentException("Refresh token mismatch")
+        }
+        return RefreshResponse(token = jwtProvider.createToken(user.email, user.isAdmin))
     }
 
     @Transactional
